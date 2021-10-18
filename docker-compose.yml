@@ -1,0 +1,43 @@
+  version: '3'
+  services:
+    db:    
+      image: postgres:8
+      restart: always   
+      environment:        
+        POSTGRES_USER: postgres        
+        POSTGRES_PASSWORD: games123        
+        POSTGRES_DB: postgres
+      volumes:
+        - db-data:/var/lib/postgresql/data   
+        - ./sql:/docker-entrypoint-initdb.d/"   
+      
+    adminer:
+      depends_on:
+        - db
+      image: adminer
+      restart: always
+      ports:
+        - 8080:8080
+
+    openfire:
+      depends_on:
+        - db
+      build: .
+      restart: "no"
+      ports:
+        - "9090:9090/tcp"
+        - "9091:9091/tcp"
+        - "5222:5222/tcp"
+        - "7777:7777/tcp"
+        - "7070:7070/tcp"
+      volumes:
+        - .:/code
+        - openfire-data:/var/lib/openfire
+        # - ./openfire.xml:/var/lib/openfire/conf/openfire.xml
+      environment:
+        TZ: "Asia/Kolkata"
+        # DAEMON_OPTS: -Xms32m -Xmx128m -Xss128k -Xoss128k -XX:ThreadStackSize=128 -XX:+PrintGCDetails -Xloggc:/var/log/openfire/gc.log -XX:+HeapDumpOnOutOfMemoryError
+      
+  volumes:
+    db-data:
+    openfire-data:
